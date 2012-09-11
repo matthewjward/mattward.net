@@ -1,0 +1,75 @@
+.images {
+	position: absolute;		
+
+}
+
+.images:hover {
+	background: #ffff7a;
+
+}
+
+a{
+	text-decoration: none;
+}
+
+#image1 {
+	top:20px;
+	left:60px;	
+}
+
+#image2 {
+	top:162px;
+	left:6px;	
+}
+
+#image3 {
+	top:225px;
+	left:90px;	
+	
+}
+
+#image4 {
+	top:9px;
+	left:169px;		
+}
+	
+#image5 {
+	top:49px;
+	left:187px;		
+}
+
+#image6 {
+	top:243px;
+	left:217px;		
+}
+
+#image7 {
+	top:270px;
+	left:15px;		
+}
+
+
+#image8 {
+	top:339px;
+	left:79px;		
+}
+
+#blog {
+	position: absolute;
+	top: 190px;
+	left: 150px;
+	color: white;
+	font-size: 60px;
+	font-family:"lucida sans";
+}
+
+#photoblog {
+	width: 465px;
+	height: 455px;
+}
+
+#twitter {
+	position: fixed;
+	right: 5px;
+	bottom: 5px;
+}
