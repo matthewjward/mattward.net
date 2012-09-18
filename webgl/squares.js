@@ -10,8 +10,8 @@ function Squares() {
 		//var fragmentShader = getShader(gl, "shader-fs");
 		//var vertexShader = getShader(gl, "shader-vs");
 
-		var fragmentShader = getShader(gl, "shader-fs", "./webgl/fragment.shader");
-		var vertexShader = getShader(gl, "shader-vs", "./webgl/vertex.shader");
+		var fragmentShader = getShader(gl, "shader-fs", "./webgl/shaders/fragment.shader");
+		var vertexShader = getShader(gl, "shader-vs", "./webgl/shaders/vertex.shader");
 						
 		shaderProgram = gl.createProgram();
 		gl.attachShader(shaderProgram, vertexShader);
