@@ -1,0 +1,30 @@
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0px;
+}
+
+#background-canvas {
+	display: block;
+}
+
+a{
+	text-decoration: none;
+}
+
+#footer {
+	position: fixed;
+	bottom: 5px;
+	width: 100%;
+	
+}
+
+#footer a {
+	float: right;
+	margin-right: 5px;
+}
+
+#footer img {
+	display: block;
+	border: 0px;
+}
