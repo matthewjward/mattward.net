@@ -1,4 +1,16 @@
 #################
+## Me
+#################
+
+
+Libraries/
+images/icons/
+tutorials
+config.py
+*blah*.*
+*test*.*
+
+#################
 ## Eclipse
 #################
 
