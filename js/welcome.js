@@ -78,6 +78,9 @@ $(document).ready(function() {
 			gl.viewportWidth = canvas.width;
 			gl.viewportHeight = canvas.height;
 			}
+		if(optionJob) {
+			optionJob.resize();	
+		}
 	}
 	
 	//webGLinit	

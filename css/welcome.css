@@ -84,25 +84,44 @@ html, body {
 	padding: 2px;
 	font-size: 16px;
 	text-align:center;	
-	border: 1px black solid;
-	border-radius: 4px;
 	width: 33.33333333333333%;	
 }
 
-.statsNavItemInset{
-	float:left;
+.statsNavLeagueInset{
+	float:right;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	border: 1px black solid;
 	border-radius: 4px;
-	width: 50%;
+	width: 30%;
 }
 
+#statsFooter{
+	position: absolute;	
+	height: 20px;
+	bottom:10px;
+	left: 10px;
+	right: 10px;
+	overflow: hidden;	
+	box-sizing: border-box;
+}
+
+.statsFooterItem{
+	overflow: auto;
+	float:left;
+	width: 33.33333333333333%;	
+	height: 20px;
+}
+
+.arrow{
+	display: block;
+	float:left;
+}
 
 #statsContent{	
 	position: absolute;		
-	top: 75px;	
-	bottom:0px;
+	top: 70px;	
+	bottom:35px;
 	left: 10px;
 	right: 10px;
 	overflow: hidden;	
@@ -157,14 +176,20 @@ html, body {
 	box-sizing: border-box;	
 }
 
-#fantasyHeader {
-	overflow: hidden;
+.fantasyColumnHeader {
+	position: relative;
+	top: 5px;
+	float: right;
+	font-size: 14px;
+	width: 15%;
 }
 
-.fantasyColumnHeader {
-	float: right;
-	font-size: 18px;
-	margin-right: 5%;
+#fantasyColumnHeaderG {
+	width: 7.5%;
+}
+
+#fantasyColumnHeaderminG, #fantasyColumnHeaderfpG {
+	width: 15%;
 }
 
 .fantasyTeam {	
@@ -178,61 +203,101 @@ html, body {
 
 .fantasyTeamName{
 	float: left;
-	width: 75%;
+	width: 70%;
 	font-size: 18px;
 	text-align:right;
 }
 
-.fantasyTeamRecord{
+.fantasyTeamStat{	
 	float: right;
-	width: 20%;
-	font-size: 18px;
+	position: relative;
+	width: 15%;
+	font-size: 14px;
 	text-align:center;
+	top: 2.5px;	
 }
 
 /* stats - fantasy players*/
 
-#fantasyTeamDetail {
+#fantasyTeamDetail, #nbaTeamDetail {
 	overflow: hidden;
 	max-height: 100%;
 	width: 33.3333333333%;
 	float: left;
 	box-sizing: border-box;
-	--border: 1px red solid;
+	
 	
 }
-
-.fantasyTeamPlayer {
-	--width:200px;
-	font-size: 18px;
-	text-align:center;
+.fantasyTeamPlayer, .nbaTeamPlayer {
 	padding: 2px;
 	margin: 2px;
 	border: 1px black solid;
 	border-radius: 4px;
+	box-sizing: border-box;
+	overflow: hidden;
 }
 
-/* stats - fantasy players*/
+.fantasyTeamPlayerName, .nbaTeamPlayerName{
+	float: left;
+	width: 40%;
+	padding-right: 5%;
+	font-size: 18px;
+	text-align:right;
+}
 
-#nbaTeamDetail {
+.fantasyTeamPlayerStat, .nbaTeamPlayerStat{	
+	float: left;
+	position: relative;	
+	font-size: 14px;
+	text-align:center;
+	top: 2.5px;	
+}
+
+#fantasyTeamPlayerG, #fantasyTeamPlayerPos, #nbaTeamPlayerG, #nbaTeamPlayerPos {
+	width: 7.5%;
+}
+
+#fantasyTeamPlayerTeam, #nbaTeamPlayerOwner {
+	width: 10%;
+}
+
+#fantasyTeamPlayerminG, #fantasyTeamPlayerfpG, #nbaTeamPlayerminG, #nbaTeamPlayerfpG {
+	width: 15%;
+}
+
+/* stats - fantasy teams*/
+
+#fantasyTeamStats {
 	overflow: hidden;
 	max-height: 100%;
-	width: 33.33333333333333%;
-	float: left;
-	box-sizing: border-box;
-	--border: 1px red solid;
-	
+	width: 33.3333333333%;
+	float: right;
+	box-sizing: border-box;	
 }
 
-.nbaTeamPlayer {
-	--width:200px;
-	font-size: 18px;
+#expand {
+	float: left;
+	margin-left: 25px;
+	font-weight: bold;
+}
+
+.expanded {
+	float: right !important;
+}
+
+
+#toolTipBox {
+	position: relative;
+	margin-left: 25px;
+	font-size: 14px;
 	text-align:center;
 	padding: 2px;
-	margin: 2px;
 	border: 1px black solid;
 	border-radius: 4px;
+	box-sizing: border-box;
+	overflow: hidden;
 }
+
 
 /* options - boilerplate*/
 
