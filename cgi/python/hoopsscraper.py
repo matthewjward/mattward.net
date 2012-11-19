@@ -48,24 +48,28 @@ def get_player_details(name, last_game):
 	soup = BeautifulSoup(get_page("http://hoops.sports.ws/player/%s?lastcount=82" % (name)))
 					
 	status = soup.find(text=re.compile("Status"))
-	status = status.next_element
-	while (type(status) == Tag or status.strip() == ""):		
-		status = status.next_element		
 	
-	db_status = status.strip()
-	if (db_status != "Active"):
-		#get injury
-		db_injury = status.next_element.contents[1].strip()
+	details = [text for text in status.parent.parent.stripped_strings] #clever!
+	
+	if details[1] == 'Next Game:':
+		db_status = ""
+	if details[1] == 'Injury:':
+		db_status = ""
+		db_injury = details[2]
 	else:
-		db_injury = ""
+		db_status = details[1]		
+		if db_status != 'Active':
+			db_injury = details[3]
+		else:
+			db_injury = ""			
 	
 	section = status.parent.parent.parent						
 	detail = section.b.contents[0].replace('(', ' ').split('-',1)
 	db_pos = detail[0].strip()
 	db_cleanname = detail[1].strip()					
 	owned = soup.find(text=re.compile("Percent owned"))					
-	db_owned = owned.next_sibling.contents[0].strip('%')
-
+	db_owned = owned.next_sibling.contents[0].strip('%')	
+	
 	games = []
 	
 	#doesn't seem to be shpwing up in games list.... look in recent site activity for now
@@ -349,13 +353,13 @@ def update_players(division):
 	output('update players:' + division);
 	check_connection()
 	cur = con.cursor(mdb.cursors.DictCursor)	
-	#cur.execute("SELECT * FROM nbaPlayers WHERE team IS NOT NULL order by team, name")
 	cur.execute("SELECT t1.*, max(game) last_game FROM nbaPlayers as t1 JOIN nbaTeams as t3 ON (t1.team = t3.code) LEFT JOIN nbaStats20122013 as t2 ON (t1.name = t2.name) WHERE t3.division LIKE %s GROUP BY t1.name ORDER BY t1.team, t1.name", division )
 	
 	rows = cur.fetchall()
 	
-	for row in rows:	
-		details = get_player_details(row['name'], row['last_game'])				
+	for row in rows:				
+		#output(row['name'])
+		details = get_player_details(row['name'], row['last_game'])								
 				
 		#update active
 		if ((details['status'] == 'Active') != bool(row['active'])):
@@ -371,7 +375,7 @@ def update_players(division):
 		
 		#update owned	
 		if (abs(row['owned'] - int(details['owned'])) > 0):
-			output('%s has gone from %s to %s' % (row['cleanname'], row['owned'], details['owned']))
+			#output('%s has gone from %s to %s' % (row['cleanname'], row['owned'], details['owned']))
 			check_connection()
 			cur = con.cursor()   
 			cur.execute("UPDATE nbaPlayers SET owned=%s WHERE name=%s", (details['owned'], row['name'])) 
@@ -384,10 +388,10 @@ def update_players(division):
 		
 		#update games
 		for game in details['games']:
-			output(row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
+			output(row['team'] + row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
 			check_connection()		
 			cur=con.cursor()			
-			cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, date, min, fp) VALUES(%s,%s,%s,%s,%s)", (row['name'], game['game'], game['date'], game['min'], game['fp']))
+			cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, team, date, min, fp) VALUES(%s,%s,%s,%s,%s,%s)", (row['name'], game['game'], row['team'], game['date'], game['min'], game['fp']))
 				
 def update_nba_results():			
 	name_check = {'BKN': 'BKL', 'GS': 'GSW', 'NO': 'NOR', 'NY': 'NYK', 'OKC': 'OKL', 'PHX': 'PHO', 'SA': 'SAS', 'UTAH': 'UTA', 'WSH': 'WAS'}
@@ -458,11 +462,11 @@ start_time = datetime.now()
 output(start_time)
 
 tod = time.gmtime() 
-#time_based_update()
+time_based_update()
 #update_teams()
 #update_fantasy_teams()
 #update_players('%')
-update_nba_results()
+#update_nba_results()
 		
 con.close()
 end_time = datetime.now()		

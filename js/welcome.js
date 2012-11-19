@@ -85,7 +85,7 @@ $(document).ready(function() {
 	
 	//webGLinit	
 	initGL(canvas);
-	if (gl) {
+	if (gl) {	
 		job = new Squares();
 		job.initShaders();
 		job.initBuffers();

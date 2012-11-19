@@ -11,8 +11,7 @@ function pastelColour() {
 var mouseDownItem = "none";
 function doSomething() {			
 	if (!mouseDownItem) { return; }     
-		
-	console.log(currentNav);		
+			
 	switch (mouseDownItem)
 	{
 		
@@ -20,49 +19,49 @@ function doSomething() {
 			if (currentNav == 'statsNavLeagueFantasy') 
 			{
 				var scrollTop = $('#fantasyContent').scrollTop();		
-				$('#fantasyContent').scrollTop(scrollTop-5);
+				$('#fantasyContent').scrollTop(scrollTop-10);
 			} else {
 				var scrollTop = $('#nbaContent').scrollTop();		
-				$('#nbaContent').scrollTop(scrollTop-5);			
+				$('#nbaContent').scrollTop(scrollTop-10);			
 			}
 			break;
 		case ('statsFooterLeague'):							
 			if (currentNav == 'statsNavLeagueFantasy') 
 			{		
 				var scrollTop = $('#fantasyContent').scrollTop();					
-				$('#fantasyContent').scrollTop(scrollTop+5);					
+				$('#fantasyContent').scrollTop(scrollTop+10);					
 			} else {
 				var scrollTop = $('#nbaContent').scrollTop();					
-				$('#nbaContent').scrollTop(scrollTop+5);								
+				$('#nbaContent').scrollTop(scrollTop+10);								
 			}
 			break;		
 		case ('statsNavPlayers'):			
 			if (currentNav == 'statsNavLeagueFantasy') 
 			{
 				var scrollTop = $('#fantasyTeamDetail').scrollTop();		
-				$('#fantasyTeamDetail').scrollTop(scrollTop-5);				
+				$('#fantasyTeamDetail').scrollTop(scrollTop-10);				
 			} else	{
 				var scrollTop = $('#nbaTeamDetail').scrollTop();		
-				$('#nbaTeamDetail').scrollTop(scrollTop-5);				
+				$('#nbaTeamDetail').scrollTop(scrollTop-10);				
 			}
 			break;
 		case ('statsFooterPlayers'):							
 			if (currentNav == 'statsNavLeagueFantasy') 
 			{
 				var scrollTop = $('#fantasyTeamDetail').scrollTop();		
-				$('#fantasyTeamDetail').scrollTop(scrollTop+5);				
+				$('#fantasyTeamDetail').scrollTop(scrollTop+10);				
 			} else	{
 				var scrollTop = $('#nbaTeamDetail').scrollTop();		
-				$('#nbaTeamDetail').scrollTop(scrollTop+5);				
+				$('#nbaTeamDetail').scrollTop(scrollTop+10);				
 			}
 			break;
 		case ('statsNavCharts'):			
 			var scrollTop = $('#fantasyTeamStats').scrollTop();		
-			$('#fantasyTeamStats').scrollTop(scrollTop-5);				
+			$('#fantasyTeamStats').scrollTop(scrollTop-10);				
 			break;			
 		case ('statsFooterCharts'):							
 			var scrollTop = $('#fantasyTeamStats').scrollTop();		
-			$('#fantasyTeamStats').scrollTop(scrollTop+5);				
+			$('#fantasyTeamStats').scrollTop(scrollTop+10);				
 			break;
 		}
 									
@@ -78,78 +77,59 @@ function stats(parent) {
 	graphData = new Object();
 	currentLast10only = true;
 	haveData = false;
+	last_line = 0;
+	last_bar = 0;	
 	
 	setGraph = function(data, type)
 	{
-		graphType = type;		
-		
-		if (data) {
-			haveData = true;
-			last_line = 0;
-			last_bar = 0;			
+		graphType = type;				
+		if (!data) {
+			if (haveData) {
+				data = graphData[type];	
+				switch(graphType)
+				{
+					case('line'):						
+						lineSelect(data[last_line-1]);
+					break;
+					case('bar'):								
+						if (last_bar > 0)
+							barSelect(last_bar);
+					break;
+				}				
+			}		
+		}		
+		else {
+			haveData = true;						
 			graphData[type] = data;										
 			switch(graphType){
-				case('line'):		
+				case('line'):
+					last_line = 0;				
 					for (i=1;i<=82;i++){				
 						if (data[i-1] != "")
 							last_line = i;
 					}
-					$toolTipBox = $('#toolTipBox');
-					$toolTipBox.empty();		
-					$resultTip = $('<div id="resultTip">'+data[last_line-1]['score']+' vs '+data[last_line-1]['name']+' '+data[last_line-1]['moniker']+' '+data[last_line-1]['opponent_score']+'</div>');				
-					$resultTip.appendTo($toolTipBox);			
-					$toolTipBox.show();
+					lineSelect(data[last_line-1]);
 				break;
 				case('bar'):								
-					barColours = [];					
-					for (i=1;i<=82;i++){					
-						if (data[i-1].length == 2)
-							last_bar = i; 
+					barColours = [];		
+					last_bar = 0;								
+					for (i=0;i<82;i++){							
 						barColours.push("rgb(255, 192, 192)");
 						barColours.push("rgb(192, 192, 255)");
-					}					
-					// refactor
-					barSelect(last_bar);
+						if (data[i][0] > 0)
+						{
+							last_bar = i+1; 
+						}
+					}	
+					if (last_bar > 0)
+						barSelect(last_bar);
 				break;
-			}
-			
-			
+			}						
 		}
-	}
-	
-	checkArrows = function()
-	{
-		if (currentNav == 'statsNavLeagueFantasy') 
-		{
-			if ($(fantasyContent)[0].scrollHeight > $(fantasyContent).height())		
-				$('#statsFooterLeague, #statsNavLeague').children('.arrow').show();
-			else
-				$('#statsFooterLeague, #statsNavLeague').children('.arrow').hide();
-			if ($(fantasyTeamDetail)[0].scrollHeight > $(fantasyTeamDetail).height())
-				$('#statsNavPlayers, #statsFooterPlayers').children('.arrow').show();
-			else
-				$('#statsNavPlayers, #statsFooterPlayers').children('.arrow').hide();								
-		}			
-		else
-		{
-			if ($(nbaContent)[0].scrollHeight > $(nbaContent).height())
-				$('#statsFooterLeague, #statsNavLeague').children('.arrow').show();
-			else
-				$('#statsFooterLeague, #statsNavLeague').children('.arrow').hide();
-							
-			if ($(nbaTeamDetail)[0].scrollHeight > $(nbaTeamDetail).height())			
-				$('#statsNavPlayers #statsFooterPlayers').children('.arrow').show();
-			else
-				$('#statsNavPlayers #statsFooterPlayers').children('.arrow').hide();						
-		}
-		if ($(fantasyTeamStats)[0].scrollHeight > $(fantasyTeamStats).height())		
-			$('#statsNavCharts, #statsFooterCharts').children('.arrow').show();			
-		else
-			$('#statsNavCharts, #statsFooterCharts').children('.arrow').hide();				
-	}
+	}	
 	
 	drawGraph = function(last10only)
-	{				
+	{						
 		if (last10only==undefined)
 			last10only = currentLast10only;
 		else
@@ -159,18 +139,18 @@ function stats(parent) {
 
 		var graph; 
 		var data = [];
-									
-		$canvasBox = $('#canvasBox');
-		$canvasBox.empty();		
+		var labels = [];
+		var colours = [];						
 		
-		$shinyNewCanvas = $('<canvas id="shinyNewCanvas" width="'+$fantasyTeamStats.css('width')+'" height="300"></canvas>');		
-		$shinyNewCanvas.appendTo($canvasBox);							
-			
+		RGraph.ObjectRegistry.Clear();
+		$shinyNewCanvas = $('#shinyNewCanvas');
+		RGraph.Reset($shinyNewCanvas[0]);				
+		$shinyNewCanvas.attr('width', $('#fantasyTeamStats').css('width'));				
+		
 		switch(graphType){
-			case('line'):
-				if (last10only) 
+			case('line'):							
 				for(i=0;i<(last10only ? 10 : 82);i++){
-					data.push(graphData['line'][i]['score']);
+					data.push(graphData['line'][i]['score']);					
 				}
 				graph = new RGraph.Line("shinyNewCanvas", data);	
 				graph.Set('chart.ymin', 125);
@@ -184,27 +164,32 @@ function stats(parent) {
 				graph.Set('chart.events.click', lineClick); 	
 				graph.Set('chart.colors', ["rgb(192, 192, 192)"])				
 				break;
-			case('bar'):
-				for(i=0;i<(last10only ? 10 : 82);i++){
+			case('bar'):				
+				for(i=(last10only ? Math.max(last_bar,10)-10 : 0);i<(last10only ? Math.max(last_bar,10) : 82);i++){
 					data.push(graphData['bar'][i]);
-				}			
+					labels.push(i+1);
+					colours.push(barColours[2*i]);
+					colours.push(barColours[2*i+1]);
+				}		
 				graph = new RGraph.Bar('shinyNewCanvas', data);
 				graph.Set('chart.ymin', 0);
 				graph.Set('chart.ymax', 60);
 				graph.Set('chart.gutter.top', 5);
-				graph.Set('chart.gutter.bottom', 5);
+				graph.Set('chart.gutter.bottom', 15);
 				graph.Set('chart.gutter.right', 5);
 				graph.Set('chart.hmargin.grouped', 0.5);
 				graph.Set('chart.hmargin', 1);							
 				graph.Set('chart.events.click', barClick); 				
 				graph.Set('chart.background.grid.autofit.numvlines', 10);			
 				graph.Set('chart.colors.sequential', true)
-				graph.Set('chart.colors', barColours)
-				
-			break;
-		};
-		graph.Draw();								
-		$('#fantasyTeamStats').show();		
+				graph.Set('chart.colors', colours)
+				graph.Set('chart.labels', labels)					
+				graph.Set('chart.text.size', last10only ? 8 : 6)											
+				//graph.Set('chart.xlabels.offset', 2)					
+				break;
+		};		
+		graph.Draw();							
+		checkArrows();
 	}
 
 	function lineTick (obj, data, value, index, x, y, color, prevX, prevY)
@@ -241,31 +226,51 @@ function stats(parent) {
 
 	function barSelect(game)
 	{
+
 		barColours[2*(game-1)] = "rgb(255, 128, 128)";
-		barColours[2*(game-1)+1] = "rgb(128, 128, 255)";	
+		barColours[2*(game-1)+1] = "rgb(128, 128, 255)";			
 				
 		//need to get the current players team, without hitting the database
 		if (currentNav == 'statsNavLeagueReal')
 			team = currentTeamId;
 		else
 			team = $('#'+currentPlayerId).children('#fantasyTeamPlayerTeam').html();
-
+				
 		$toolTipBox = $('#toolTipBox');	
-		$toolTipBox.empty();		
-		$toolTipBox.hide();		
+		$toolTipBox.empty();				
+		$toolTipBox.hide();				
 					
-		$playerTip = $('<div id="playerTip">Minutes Played: '+graphData['bar'][game-1][0] + '  Fantasy Points: '+graphData['bar'][game-1][1]+'</div>')
+		$playerTip = $('<div id="playerTip"><span style="color:rgb(255, 128, 128)"> &#9632</span> Minutes Played: '+graphData['bar'][game-1][0] + ' <span style="color:rgb(128, 128, 255)">&#9632</span> Fantasy Points: '+graphData['bar'][game-1][1]+'</div>')
 		$playerTip.appendTo($toolTipBox);
 		$.get('cgi/python/hoopsstats.py?task=nbaResult&id='+team+'&game='+last_bar, 
 		function(data) {										
 			var JSON = eval(data)[0];						
 			$toolTipBox = $('#toolTipBox');	
-			$resultTip = $('<div id="resultTip">'+JSON['location']+' '+JSON['name']+' '+JSON['result']+' '+JSON['score']+'</div>');				
-			$resultTip.appendTo($toolTipBox);
-			$toolTipBox.show();
-			drawGraph();
-		});		
+			$resultTip = $('<div id="resultTip">'+JSON['location']+' '+JSON['name']+' '+ (JSON['result'] == null ? "" : JSON['result']+' '+JSON['score'])+'</div>');				
+			$resultTip.appendTo($toolTipBox);	
+			
+			$('#fantasyTeamStats').show();		
+			drawGraph();												
+			$toolTipBox.show();	//need a check arrows here								
+			checkArrows();						
+		});			
 	}
+	
+	lineSelect = function(game)
+	{
+		$toolTipBox = $('#toolTipBox');
+		$toolTipBox.empty();		
+		if (game['score'] > game['opponent_score'])
+			thingo = '<span style="color:rgb(255, 128, 128)">W </span>';
+		else
+			thingo = '<span style="color:rgb(128, 128, 128)">L </span>';
+
+		$resultTip = $('<div id="resultTip">'+thingo+game['score']+' vs '+game['name']+' '+game['moniker']+' '+game['opponent_score']+'</div>');				
+		$resultTip.appendTo($toolTipBox);			
+		$('#fantasyTeamStats').show();		
+		drawGraph();				
+		checkArrows();						
+	}	
 	
 	function barClick (e, bar)
     {        		
@@ -277,8 +282,7 @@ function stats(parent) {
 		barColours[2*(last_bar-1)] = "rgb(255, 192, 192)";
 		barColours[2*(last_bar-1)+1] = "rgb(192, 192, 255)";					
 
-		last_bar = game;
-		
+		last_bar = game;		
 		barSelect(game);
 	}	
 	
@@ -290,24 +294,18 @@ function stats(parent) {
 			return;
 		
 		last_line = game;
-		data = graphData['line'];
-		team = currentTeamId.split('fantasyTeam')[1];
-		
-		$toolTipBox = $('#toolTipBox');	
-		$toolTipBox.empty();				
-		$resultTip = $('<div id="resultTip">'+data[last_line-1]['score']+' vs '+data[last_line-1]['name']+' '+data[last_line-1]['moniker']+' '+data[last_line-1]['opponent_score']+'</div>');				
-		$resultTip.appendTo($toolTipBox);			
-		drawGraph();
+		data = graphData['line'];		
+		lineSelect(data[game-1]);			
     }
-		
+						
 	setTeamContent = function(content) 
 	{		
 		$('#statsNavPlayers').hide();
-		$('#statsNavCharts').hide();
-		$('.arrow').hide();
+		$('#statsNavCharts').hide();		
 		$statsContent = $('#statsContent');
-		$statsContent.empty();			
+		$statsContent.empty();			//do we have to?
 		currentTeamId = -1;
+		
 		if (content == 'fantasy')
 		{		
 			currentNav = 'statsNavLeagueFantasy';
@@ -332,12 +330,7 @@ function stats(parent) {
 								'</div>');				
 					$teamDiv.appendTo($fantasyContent);
 				}			
-								
-				if ($(fantasyContent)[0].scrollHeight > $(fantasyContent).height())
-				{
-					$('#statsFooterLeague').children('.arrow').show();
-					$('#statsNavLeague').children('.arrow').show();
-				}
+				checkArrows();
 			});
 
 		}
@@ -358,6 +351,8 @@ function stats(parent) {
 			$nbaTeamDetail = $('<div id="nbaTeamDetail" class="scrollable"></div>');
 			$nbaTeamDetail.appendTo(statsContent);			
 			
+			
+			
 			$.get('cgi/python/hoopsstats.py?task=nbaTeams', function(data) {						
 				$nbaContentLeft = $('#nbaContentLeft');
 				$nbaContentRight = $('#nbaContentRight');
@@ -368,23 +363,17 @@ function stats(parent) {
 					$newDiv = $('<div id="'+JSON[i]['code']+'" class="nbaTeam">'+JSON[i]['name']+'</div>');						
 					JSON[i]['conference'] == 'East' ? $newDiv.appendTo($nbaContentLeft) : $newDiv.appendTo($nbaContentRight);
 				}						
-				if ($(nbaContent)[0].scrollHeight > $(nbaContent).height())
-				{
-					$('#statsFooterLeague').children('.arrow').show();
-					$('#statsNavLeague').children('.arrow').show();				
-				}
+				checkArrows();
 			});
 		}
 		
 		$fantasyTeamStats = $('<div id="fantasyTeamStats" class="scrollable"></div>');
-		$fantasyTeamStats.appendTo($statsContent);		
-
-		$canvasBox = $('<div id="canvasBox"></div>');
-		$canvasBox.appendTo($fantasyTeamStats);		
+		$fantasyTeamStats.appendTo($statsContent);				
+		$shinyNewCanvas = $('<canvas id="shinyNewCanvas" width="'+$fantasyTeamStats.css('width')+'" height="300"></canvas>');		
+		$shinyNewCanvas.appendTo($fantasyTeamStats);				
 		$toolTipBox = $('<div id="toolTipBox"></div>');	
-		$toolTipBox.appendTo($fantasyTeamStats);			
-			
-		$('#fantasyTeamStats').hide();			
+		$toolTipBox.appendTo($fantasyTeamStats);	
+		$('#fantasyTeamStats').hide();		
 	}
 		
 
@@ -410,8 +399,6 @@ function stats(parent) {
 					'</div>');
 					
 		$statsNav.appendTo(this.$parent);
-		//fantasyColour = new pastelColour();
-		//$('#statsNavLeague').css('background-color','rgb('+fantasyColour.red+','+fantasyColour.green+','+fantasyColour.blue+')');	
 	
 		//create footer
 		$statsFooter = $('<div id="statsFooter"> ' +		
@@ -426,7 +413,10 @@ function stats(parent) {
 							'</div>' +
 						'</div>');
 		$statsFooter.appendTo(this.$parent);
-	
+		
+		//hide all the arrows to begin
+		$('.arrow').hide();
+		
 		//create content
 		$statsContent = $('<div id="statsContent"></div>');
 		$statsContent.appendTo(this.$parent);
@@ -438,9 +428,7 @@ function stats(parent) {
 				var scrollTop = $(this).scrollTop();		
 				$(this).scrollTop(scrollTop-10*Math.round(delta));
 		});
-		
-		
-		
+					
 		$('#stats').on('mousedown', '.arrow',
 			function() {	
 				mouseDownItem = $(this).parent().attr('id');
@@ -464,8 +452,7 @@ function stats(parent) {
 						setTeamContent('fantasy');						
 						break;
 					case('statsNavLeagueReal'):
-						setTeamContent('real');
-						
+						setTeamContent('real');						
 						break;					
 				}
 			}
@@ -473,7 +460,6 @@ function stats(parent) {
 			
 		$('#statsNav').on('click', '#expand',		
 			function() {	
-				console.log($(this).html());
 				switch($(this).html())
 				{
 					case('&lt;&lt;'):
@@ -492,7 +478,9 @@ function stats(parent) {
 						$('#statsFooterCharts').css('width', '100%');		
 						$(this).addClass('expanded');
 						$(this).html('>>');
+						
 						drawGraph(false);	
+						
 						break;
 					case('&gt;&gt;'):
 						$('#fantasyTeamStats').css('width', '33.3333333333%');		
@@ -510,7 +498,6 @@ function stats(parent) {
 						$('#statsFooterLeague').show();
 						$('#statsNavPlayers').show();
 						$('#statsFooterPlayers').show();
-												
 						drawGraph(true);	
 						
 						break;
@@ -569,13 +556,13 @@ function stats(parent) {
 					$(this).css('background-color','rgb('+currentTeamColour.red+','+currentTeamColour.green+','+currentTeamColour.blue+')');					
 		
 					$('#statsNavPlayers').hide();
-					$('#statsNavCharts').hide();
+					$('#statsFooterPlayers').hide();
+					$('#statsNavCharts').hide();					
+					$('#statsFooterCharts').hide();					
 					$('#fantasyTeamStats').hide();
-					$('#toolTipBox').hide();
 					
 					$fantasyTeamDetail = $('#fantasyTeamDetail');
 					$fantasyTeamDetail.empty();
-
 		
 					currentTeamId = id;		
 					currentPlayerId = -1;			
@@ -585,9 +572,7 @@ function stats(parent) {
 						players = JSON['players']
 						results = JSON['results']
 						if ((JSON['id'] == checkId) && ($('.fantasyTeamPlayer').length == 0))
-						{						
-							$('#statsNavPlayers').show();
-							$('#statsNavCharts').show();
+						{																																	
 							for (var i=0;i<players.length;i++){	
 								$playerDiv = $('<div id="'+players[i]['name']+'" class="fantasyTeamPlayer">'+
 													'<div class="fantasyTeamPlayerName">'+players[i]['cleanname']+'</div>'+		//name
@@ -599,37 +584,23 @@ function stats(parent) {
 												'</div>');				
 								$playerDiv.css('background-color','rgb('+currentTeamColour.red+','+currentTeamColour.green+','+currentTeamColour.blue+')');	
 								$playerDiv.appendTo($fantasyTeamDetail);								
-							}
-							
-							if ($(fantasyTeamDetail)[0].scrollHeight > $(fantasyTeamDetail).height())
-							{
-								$('#statsNavPlayers').children('.arrow').show();
-								$('#statsFooterPlayers').children('.arrow').show();
-							}
-							
-							//create results							
-							var lineData = [];
-							for (var i=1;i<=82;i++){	
-								lineData[i-1] = "";
-							}
-							for (var i=0;i<results.length;i++){	
-								lineData[i] = results[i];															
-							}
-							setGraph(lineData, 'line');
-							drawGraph(true);
-
-							if ($(fantasyTeamStats)[0].scrollHeight > $(fantasyTeamStats).height())
-							{
-								$('#statsNavCharts').children('.arrow').show();
-								$('#statsFooterCharts').children('.arrow').show();
 							}							
+							//create results														
+							var lineData = [];
+							for (var i=0;i<82;i++){	
+								i < results.length ? lineData[i] = results[i] : lineData[i] = "";
+							}
+							setGraph(lineData, 'line');	
+							$('#statsNavPlayers').show();
+							$('#statsFooterPlayers').show();
+							$('#statsNavCharts').show();	
+							$('#statsFooterCharts').show();																										
 						}
 					});
 				}
 				else
 				{
-					setGraph(undefined, 'line');
-					drawGraph();
+					setGraph(undefined, 'line');					
 				}
 			}										
 		);
@@ -656,7 +627,7 @@ function stats(parent) {
 						var JSON = eval(data);
 						if ((JSON[0]['team'] == currentTeamId) && ($('.nbaTeamPlayer').length == 0))
 						{
-							$('#statsNavPlayers').show();							
+							$('#statsNavPlayers').show();																	
 							for (var i=0;i<JSON.length;i++){							
 								$playerDiv = $('<div id="'+JSON[i]['name']+'" class="nbaTeamPlayer">'+
 													'<div class="nbaTeamPlayerName">'+JSON[i]['cleanname']+'</div>'+		//name
@@ -668,13 +639,8 @@ function stats(parent) {
 												'</div>');
 								$playerDiv.css('background-color','rgb('+currentTeamColour.red+','+currentTeamColour.green+','+currentTeamColour.blue+')');	
 								$playerDiv.appendTo($nbaTeamDetail);
-							}
-							
-							if ($(nbaTeamDetail)[0].scrollHeight > $(nbaTeamDetail).height())
-							{
-								$('#statsNavPlayers').children('.arrow').show();
-								$('#statsFooterPlayers').children('.arrow').show();
-							}
+							}							
+							checkArrows();
 						}
 					});
 				}
@@ -684,52 +650,78 @@ function stats(parent) {
 		$('#statsContent').on('click', '.nbaTeamPlayer, .fantasyTeamPlayer',			
 			function() {		
 				id = $(this).attr('id');		
-
+										
 				if (id != currentPlayerId) {
 					$('.fantasyTeamPlayer').css('background-color','rgb('+currentTeamColour.red+','+currentTeamColour.green+','+currentTeamColour.blue+')');		
 					$('.nbaTeamPlayer').css('background-color','rgb('+currentTeamColour.red+','+currentTeamColour.green+','+currentTeamColour.blue+')');						
 					currentPlayerColour = highlightPlayerColour;
 					$(this).css('background-color','rgb('+highlightPlayerColour.red+','+highlightPlayerColour.green+','+highlightPlayerColour.blue+')');		
 				
-					$('#fantasyTeamStats').hide();
-					$('#statsNavCharts').hide();
-					$('#toolTipBox').hide();
-
-					currentPlayerId = id;
-					
-					$.get('cgi/python/hoopsstats.py?task=playerDetails&id='+id, function(data) {												
-						var JSON = eval(data);						
-						if (JSON[0]['name'] == currentPlayerId)
+					$('#fantasyTeamStats').hide();	
+				
+					currentPlayerId = id;					
+					$.get('cgi/python/hoopsstats.py?task=playerDetails&id='+id, function(data) {																												
+						var JSON = eval(data);	
+						var playerData = [];
+						for (var i=1;i<=82;i++){	
+							playerData.push([0,0]);
+						}						
+						if (JSON.length > 0)
 						{
-							var playerData = [];
-							for (var i=1;i<=82;i++){	
-								playerData.push([]);
+							if (JSON[0]['name'] == currentPlayerId) //hack - may need to change what is returned
+							{							
+								for (var i=0;i<JSON.length;i++){	
+									playerData[JSON[i]['game']-1] = [JSON[i]['min'], JSON[i]['fp']];
+								}							
 							}
-							for (var i=0;i<JSON.length;i++){	
-								newGame = [];
-								newGame.push(JSON[i]['min']);
-								newGame.push(JSON[i]['fp']);								
-								playerData[JSON[i]['game']-1] = newGame;
-							}							
-							setGraph(playerData, 'bar');
-							drawGraph(true);	
-							$('#statsNavCharts').show();
-							if ($(fantasyTeamStats)[0].scrollHeight > $(fantasyTeamStats).height())
-							{
-								$('#statsNavCharts').children('.arrow').show();
-								$('#statsFooterCharts').children('.arrow').show();
-							}	
 						}
+						$('#statsNavCharts').show();			
+						setGraph(playerData, 'bar');						
 					});
 				}
 				else {
-					setGraph(undefined, 'bar');
-					drawGraph();
+					setGraph(undefined, 'bar');					
 				}
 			}										
 		);	
 		
 												
+	}
+	
+	checkArrows = function()
+	{
+		if (currentNav == 'statsNavLeagueFantasy') 
+		{
+			
+			if ($('#fantasyContent')[0].scrollHeight-1 > $('#fantasyContent').height())		
+				$('#statsFooterLeague, #statsNavLeague').children('.arrow').show();
+			else
+				$('#statsFooterLeague, #statsNavLeague').children('.arrow').hide();
+			
+			if ($('#fantasyTeamDetail')[0].scrollHeight-1 > $('#fantasyTeamDetail').height())
+				$('#statsNavPlayers, #statsFooterPlayers').children('.arrow').show();
+			else
+				$('#statsNavPlayers, #statsFooterPlayers').children('.arrow').hide();								
+		}			
+		else
+		{
+			if ($('#nbaContent')[0].scrollHeight-1 > $('#nbaContent').height())
+				$('#statsFooterLeague, #statsNavLeague').children('.arrow').show();
+			else
+				$('#statsFooterLeague, #statsNavLeague').children('.arrow').hide();
+
+			if ($('#nbaTeamDetail')[0].scrollHeight-1 > $('#nbaTeamDetail').height())			
+				$('#statsNavPlayers, #statsFooterPlayers').children('.arrow').show();
+			else
+				$('#statsNavPlayers, #statsFooterPlayers').children('.arrow').hide();						
+		}
+		
+
+		if ($('#fantasyTeamStats')[0].scrollHeight-1 > $('#fantasyTeamStats').height())		
+			$('#statsNavCharts, #statsFooterCharts').children('.arrow').show();			
+		else
+			$('#statsNavCharts, #statsFooterCharts').children('.arrow').hide();				
+		
 	}
 	
 	this.resize = function()

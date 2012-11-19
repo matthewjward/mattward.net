@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python2.7
 # -*- coding: utf-8 -*-
 
 import MySQLdb as mdb
@@ -17,45 +17,27 @@ html = '''
 
 '''
 
-con = None
-
-try:
-	#print os.environ['QUERY_STRING']
-	#print os.environ['REQUEST_METHOD']
-	query = urlparse.parse_qs(os.environ['QUERY_STRING'])
-	id = query['id'][0]
+query = urlparse.parse_qs(os.environ['QUERY_STRING'])
+id = query['id'][0]
 	
-	con = mdb.connect('mattwarddb.db.9795362.hostedresource.com', 'mattwarddb', config.password, 'mattwarddb')
+con = mdb.connect('mattwarddb.db.9795362.hostedresource.com', 'mattwarddb', config.password, 'mattwarddb')
+cur = con.cursor(mdb.cursors.DictCursor)
+cur.execute("SELECT * FROM questions WHERE Id = %s", (id))	
+data = cur.fetchone()	
 	
-	#cur = con.cursor()
-	cur = con.cursor(mdb.cursors.DictCursor)
-	cur.execute("SELECT * FROM questions WHERE Id = %s", (id))
-
-	data = cur.fetchone()
-	
-	
-	if (data == None):
-		response_body = '''
-		<div id="ta">Thank you!</div>
-		'''
-	else:	
-		question = data["question"]
-		answers = data["answers"].split(';')
-		response_body = html % (question, answers[0], answers[1], answers[2], answers[3])
-    
-	print '''Content-Type: text/html
-	
+if (data == None):
+	response_body = '''
+	<div id="ta">Thank you!</div>
 	'''
-	print response_body
-	
+else:	
+	question = data["question"]
+	answers = data["answers"].split(';')
+	response_body = html % (question, answers[0], answers[1], answers[2], answers[3])
     
-except mdb.Error, e:
-  
-  
-    print "Error %d: %s" % (e.args[0],e.args[1])
-    sys.exit(1)
-    
-finally:    
-        
-    if con:    
-        con.close()
+print '''Content-Type: text/html
+
+'''
+
+print response_body
+
+con.close()
