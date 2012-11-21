@@ -79,6 +79,7 @@ function stats(parent) {
 	haveData = false;
 	last_line = 0;
 	last_bar = 0;	
+	selected_bar = 0;	
 	
 	setGraph = function(data, type)
 	{
@@ -165,7 +166,7 @@ function stats(parent) {
 				graph.Set('chart.colors', ["rgb(192, 192, 192)"])				
 				break;
 			case('bar'):				
-				for(i=(last10only ? Math.max(last_bar,10)-10 : 0);i<(last10only ? Math.max(last_bar,10) : 82);i++){
+				for(i=(last10only ? Math.max(last_bar-10,0) : 0);i<(last10only ? Math.max(last_bar,10) : 82);i++){
 					data.push(graphData['bar'][i]);
 					labels.push(i+1);
 					colours.push(barColours[2*i]);
@@ -226,7 +227,8 @@ function stats(parent) {
 
 	function barSelect(game)
 	{
-
+		selected_bar = game;
+		
 		barColours[2*(game-1)] = "rgb(255, 128, 128)";
 		barColours[2*(game-1)+1] = "rgb(128, 128, 255)";			
 				
@@ -242,7 +244,7 @@ function stats(parent) {
 					
 		$playerTip = $('<div id="playerTip"><span style="color:rgb(255, 128, 128)"> &#9632</span> Minutes Played: '+graphData['bar'][game-1][0] + ' <span style="color:rgb(128, 128, 255)">&#9632</span> Fantasy Points: '+graphData['bar'][game-1][1]+'</div>')
 		$playerTip.appendTo($toolTipBox);
-		$.get('cgi/python/hoopsstats.py?task=nbaResult&id='+team+'&game='+last_bar, 
+		$.get('cgi/python/hoopsstats.py?task=nbaResult&id='+team+'&game='+game, 
 		function(data) {										
 			var JSON = eval(data)[0];						
 			$toolTipBox = $('#toolTipBox');	
@@ -276,13 +278,17 @@ function stats(parent) {
     {        		
         var idx = bar['index'];
 		game = Math.round((idx+1)/2);
-		if (game == last_bar)
+		
+		if (currentLast10only){
+			game += Math.max(last_bar-10,0);
+		}
+		
+		if (game == selected_bar)
 			return;
 
-		barColours[2*(last_bar-1)] = "rgb(255, 192, 192)";
-		barColours[2*(last_bar-1)+1] = "rgb(192, 192, 255)";					
-
-		last_bar = game;		
+		barColours[2*(selected_bar-1)] = "rgb(255, 192, 192)";
+		barColours[2*(selected_bar-1)+1] = "rgb(192, 192, 255)";					
+			
 		barSelect(game);
 	}	
 	

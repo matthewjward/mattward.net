@@ -388,7 +388,7 @@ def update_players(division):
 		
 		#update games
 		for game in details['games']:
-			output(row['team'] + row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
+			output(row['team'] + ' ' + row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
 			check_connection()		
 			cur=con.cursor()			
 			cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, team, date, min, fp) VALUES(%s,%s,%s,%s,%s,%s)", (row['name'], game['game'], row['team'], game['date'], game['min'], game['fp']))
