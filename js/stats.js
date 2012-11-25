@@ -80,6 +80,7 @@ function stats(parent) {
 	last_line = 0;
 	last_bar = 0;	
 	selected_bar = 0;	
+	selected_line = 0;	
 	
 	setGraph = function(data, type)
 	{
@@ -105,9 +106,9 @@ function stats(parent) {
 			switch(graphType){
 				case('line'):
 					last_line = 0;				
-					for (i=1;i<=82;i++){				
-						if (data[i-1] != "")
-							last_line = i;
+					for (i=0;i<82;i++){				
+						if (data[i] != "")
+							last_line = i+1;
 					}
 					lineSelect(data[last_line-1]);
 				break;
@@ -149,18 +150,21 @@ function stats(parent) {
 		$shinyNewCanvas.attr('width', $('#fantasyTeamStats').css('width'));				
 		
 		switch(graphType){
-			case('line'):							
-				for(i=0;i<(last10only ? 10 : 82);i++){
+			case('line'):			
+				for(i=(last10only ? Math.max(last_line-10,0) : 0);i<(last10only ? Math.max(last_line,10) : 82);i++){
 					data.push(graphData['line'][i]['score']);					
+					labels.push(i+1);
 				}
 				graph = new RGraph.Line("shinyNewCanvas", data);	
 				graph.Set('chart.ymin', 125);
 				graph.Set('chart.ymax', 250);
 				graph.Set('chart.gutter.top', 5);
-				graph.Set('chart.gutter.bottom', 5);
+				graph.Set('chart.gutter.bottom', 15);
 				graph.Set('chart.gutter.right', 5);
 				graph.Set('chart.numyticks', 0.0000000000001);							
 				graph.Set('chart.background.grid.autofit.numvlines', 9);
+				graph.Set('chart.labels', labels)					
+				graph.Set('chart.text.size', last10only ? 8 : 6)
 				graph.Set('chart.tickmarks', lineTick);
 				graph.Set('chart.events.click', lineClick); 	
 				graph.Set('chart.colors', ["rgb(192, 192, 192)"])				
@@ -194,13 +198,15 @@ function stats(parent) {
 	}
 
 	function lineTick (obj, data, value, index, x, y, color, prevX, prevY)
-    {                		
+    {                	
+		index = currentLast10only ? last_line-(10-index) : index;
+		console.log(index);
 		if (graphData['line'][index]['score'] > graphData['line'][index]['opponent_score'])
 		{			
 			obj.context.beginPath();
 			obj.context.arc(x, y, 5, 0 , 2 * Math.PI, false);
 			
-			if (index == (last_line-1))			
+			if (index == (selected_line-1))			
 				obj.context.fillStyle = "rgb(255, 128, 128)";
 			else
 				obj.context.fillStyle = "rgb(255, 192, 192)";
@@ -213,7 +219,7 @@ function stats(parent) {
 		{			
 			obj.context.beginPath();
 			obj.context.arc(x, y, 5, 0 , 2 * Math.PI, false);
-			if (index == (last_line-1))			
+			if (index == (selected_line-1))			
 				obj.context.fillStyle = "rgb(128, 128, 128)";
 			else
 				obj.context.fillStyle = "rgb(192, 192, 192)";
@@ -260,6 +266,8 @@ function stats(parent) {
 	
 	lineSelect = function(game)
 	{
+		selected_line = game['game'];
+		console.log(selected_line);
 		$toolTipBox = $('#toolTipBox');
 		$toolTipBox.empty();		
 		if (game['score'] > game['opponent_score'])
@@ -293,13 +301,13 @@ function stats(parent) {
 	}	
 	
 	function lineClick (e, line)
-    {        
-        game = line['index'] + 1;		
-		
-		if (game == last_line)
+    {     
+		game = (currentLast10only ? last_line-(10-line['index']) : line['index']) + 1;
+	
+		if (game == selected_line)
 			return;
 		
-		last_line = game;
+		selected_line = game;
 		data = graphData['line'];		
 		lineSelect(data[game-1]);			
     }

@@ -24,7 +24,6 @@ function questions(parent) {
 				green = Math.floor(Math.random()*64) + 192;
 				blue = Math.floor(Math.random()*64) + 192;
 				$(this).css('background-color','rgb('+red+','+green+','+blue+')');								
-				//$(this).css('background-color','green');								
 			}		
 		);
 		
