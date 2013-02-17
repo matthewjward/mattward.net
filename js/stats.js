@@ -156,7 +156,7 @@ function stats(parent) {
 					labels.push(i+1);
 				}
 				graph = new RGraph.Line("shinyNewCanvas", data);	
-				graph.Set('chart.ymin', 125);
+				graph.Set('chart.ymin', 100);
 				graph.Set('chart.ymax', 250);
 				graph.Set('chart.gutter.top', 5);
 				graph.Set('chart.gutter.bottom', 15);
@@ -190,7 +190,6 @@ function stats(parent) {
 				graph.Set('chart.colors', colours)
 				graph.Set('chart.labels', labels)					
 				graph.Set('chart.text.size', last10only ? 8 : 6)											
-				//graph.Set('chart.xlabels.offset', 2)					
 				break;
 		};		
 		graph.Draw();							
@@ -409,6 +408,7 @@ function stats(parent) {
 						'<div id="statsNavCharts" class="statsNavItem">'+
 							'<img class="arrow" width=20px height=20px src=data/images/up-arrow.png>'+
 							'<div id="expand">\<\<</div>' +
+							'<div id="rgraph">graph by <a href="http://www.rgraph.net/">RGraph</a></div>' +
 						'</div>' +
 					'</div>');
 					

@@ -44,8 +44,18 @@ def	check_player_exists(name):
 			return row['good']
 	return name
 
-def get_player_details(name, last_game):
-	soup = BeautifulSoup(get_page("http://hoops.sports.ws/player/%s?lastcount=82" % (name)))
+def get_player_details(name, last_game, siteId):
+	if (siteId == 0):
+		soup = BeautifulSoup(get_page("http://hoops.sports.ws/player/%s" % (name)))
+		link = soup.find(text=re.compile("More Games"))		
+		siteId = link.parent['href'].split('?',1)[1].split('&',1)[0][7:]
+		output('Setting siteId of ' + name + ' to ' + siteId)
+		
+		check_connection()
+		cur = con.cursor()        
+		cur.execute("UPDATE nbaPlayers SET siteId=%s WHERE name=%s", (siteId, name))
+	
+	soup = BeautifulSoup(get_page("http://hoops.sports.ws/player/%s?player=%s&lastcount=82" % (name, siteId)))
 					
 	status = soup.find(text=re.compile("Status"))
 	
@@ -110,12 +120,11 @@ def get_player_details(name, last_game):
 			fp = int(node.contents[5].contents[0].strip())
 			if min > 0:
 				games.append({'game': game, 'date': date, 'min': min, 'fp': fp})
-			
-			
+						
 	return {'status': db_status, 'injury': db_injury, 'pos': db_pos, 'cleanname': db_cleanname, 'owned': db_owned, 'games':games}
 	
 def add_player(name, team):
-	details = get_player_details(name, 0)				
+	details = get_player_details(name, 0, 0)				
 	#needs to become and update or insert
 	if (details['status'] == 'Inactive'): 
 		return
@@ -189,10 +198,7 @@ def get_active_player_list(team):
 		#load the page - max loaded in 31 so may need to do more than one load
 		soup = BeautifulSoup(get_page("http://hoops.sports.ws/team.x?team=%s" % (code)))
 		#get number of active players
-		active = int(soup.find(text=re.compile("Active Players")).replace(')','*').replace('(','*').split('*')[1])
-		####hack - there are two henry sims in the knicks####
-		if (code == 'NYK'):
-			active -= 1		
+		active = int(soup.find(text=re.compile("Active Players")).replace(')','*').replace('(','*').split('*')[1])		
 		#update number of active players	
 		if (active != db_active): #this will need an alert on change!
 			output('Active has changed for %s from %s to %s' % (name, db_active, active))
@@ -357,10 +363,11 @@ def update_players(division):
 	
 	rows = cur.fetchall()
 	
-	for row in rows:				
-		#output(row['name'])
-		details = get_player_details(row['name'], row['last_game'])								
-				
+	for row in rows:					
+		if (row['siteId'] in [1701, 1793, 1772]):
+			continue
+
+		details = get_player_details(row['name'], row['last_game'], row['siteId'])												
 		#update active
 		if ((details['status'] == 'Active') != bool(row['active'])):
 			output('%s active status changed to %s' % (row['cleanname'], details['status']))			
@@ -391,8 +398,8 @@ def update_players(division):
 			output(row['team'] + ' ' + row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
 			check_connection()		
 			cur=con.cursor()			
-			cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, team, date, min, fp) VALUES(%s,%s,%s,%s,%s,%s)", (row['name'], game['game'], row['team'], game['date'], game['min'], game['fp']))
-				
+			cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, team, date, min, fp) VALUES(%s,%s,%s,%s,%s,%s)", (row['name'], game['game'], row['team'], game['date'], game['min'], game['fp']))				
+		
 def update_nba_results():			
 	name_check = {'BKN': 'BKL', 'GS': 'GSW', 'NO': 'NOR', 'NY': 'NYK', 'OKC': 'OKL', 'PHX': 'PHO', 'SA': 'SAS', 'UTAH': 'UTA', 'WSH': 'WAS'}
 	cur = con.cursor(mdb.cursors.DictCursor)

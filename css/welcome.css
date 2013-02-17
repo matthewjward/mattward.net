@@ -291,6 +291,11 @@ html, body {
 	font-weight: bold;
 }
 
+#rgraph {
+	float: right;
+	--font-weight: bold;
+}
+
 .expanded {
 	float: right !important;
 }
