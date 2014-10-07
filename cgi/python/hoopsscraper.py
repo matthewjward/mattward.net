@@ -44,7 +44,7 @@ def	check_player_exists(name):
 			return row['good']
 	return name
 
-def get_player_details(name, last_game, siteId):
+def get_player_details(name, siteId):
 	if (siteId == 0):
 		soup = BeautifulSoup(get_page("http://hoops.sports.ws/player/%s" % (name)))
 		link = soup.find(text=re.compile("More Games"))		
@@ -109,9 +109,7 @@ def get_player_details(name, last_game, siteId):
 		if (type(node.contents[2]) is not NavigableString):
 			continue
 		else:		
-			game = int(node.contents[0].contents[0]) 
-			if int(game) <= last_game:
-				break		
+			game = int(node.contents[0].contents[0]) 	
 			date = node.contents[1].contents[0]		
 			month = date.split('/')[0].strip().rjust(2,'0')
 			day = date.split('/')[1].strip().rjust(2,'0')
@@ -359,15 +357,15 @@ def update_players(division):
 	output('update players:' + division);
 	check_connection()
 	cur = con.cursor(mdb.cursors.DictCursor)	
-	cur.execute("SELECT t1.*, max(game) last_game FROM nbaPlayers as t1 JOIN nbaTeams as t3 ON (t1.team = t3.code) LEFT JOIN nbaStats20122013 as t2 ON (t1.name = t2.name) WHERE t3.division LIKE %s GROUP BY t1.name ORDER BY t1.team, t1.name", division )
+	#cur.execute("SELECT t1.*, max(game) last_game FROM nbaPlayers as t1 JOIN nbaTeams as t3 ON (t1.team = t3.code) LEFT JOIN nbaStats20122013 as t2 ON (t1.name = t2.name) WHERE t3.division LIKE %s GROUP BY t1.name ORDER BY t1.team, t1.name", division )
+	cur.execute("SELECT t1.* FROM nbaPlayers as t1 JOIN nbaTeams as t3 ON (t1.team = t3.code) WHERE t3.division LIKE %s GROUP BY t1.name ORDER BY t1.team, t1.name", division )
 	
 	rows = cur.fetchall()
 	
-	for row in rows:					
-		if (row['siteId'] in [1701, 1793, 1772]):
-			continue
+	for row in rows:			
 
-		details = get_player_details(row['name'], row['last_game'], row['siteId'])												
+		details = get_player_details(row['name'], row['siteId'])		
+		
 		#update active
 		if ((details['status'] == 'Active') != bool(row['active'])):
 			output('%s active status changed to %s' % (row['cleanname'], details['status']))			
@@ -394,11 +392,30 @@ def update_players(division):
 		cur.execute("INSERT IGNORE INTO nbaPlayersOwned(name, date, owned) VALUES(%s,%s,%s)", (row['name'], date, details['owned'])) 
 		
 		#update games
+		check_connection()
+		cur = con.cursor(mdb.cursors.DictCursor)	
+		cur.execute("SELECT * FROM nbaStats20122013 WHERE name = %s", row['name'] )	
+		existing_games = cur.fetchall()
+		
 		for game in details['games']:
-			output(row['team'] + ' ' + row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
-			check_connection()		
-			cur=con.cursor()			
-			cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, team, date, min, fp) VALUES(%s,%s,%s,%s,%s,%s)", (row['name'], game['game'], row['team'], game['date'], game['min'], game['fp']))				
+			new_found = False;
+			for existing_game in existing_games:
+				if game['game'] == existing_game['game']:
+					new_found = True;
+					if ((game['min'] != existing_game['min']) or (game['fp'] != existing_game['fp'])):
+						output('FIX ' + existing_game['team'] + ' ' + existing_game['name'] + ' ' + str(existing_game['game']) + ' FROM ' + str(existing_game['min']) + ' ' + str(existing_game['fp'])+ ' TO ' + str(game['min']) + ' ' + str(game['fp']) )
+						check_connection()		
+						cur=con.cursor()			
+						cur.execute("UPDATE nbaStats20122013 SET min = %s, fp= %s WHERE name = %s AND game = %s", (game['min'], game['fp'], existing_game['name'], existing_game['game']))				
+					break
+			
+			if (new_found == False):
+				output(row['team'] + ' ' + row['name'] + ' ' + str(game['game']) + ' ' + str(game['min']) + ' ' + str(game['fp']))
+				check_connection()		
+				cur=con.cursor()			
+				cur.execute("INSERT IGNORE INTO nbaStats20122013(name, game, team, date, min, fp) VALUES(%s,%s,%s,%s,%s,%s)", (row['name'], game['game'], row['team'], game['date'], game['min'], game['fp']))				
+		#break
+		
 		
 def update_nba_results():			
 	name_check = {'BKN': 'BKL', 'GS': 'GSW', 'NO': 'NOR', 'NY': 'NYK', 'OKC': 'OKL', 'PHX': 'PHO', 'SA': 'SAS', 'UTAH': 'UTA', 'WSH': 'WAS'}
@@ -469,10 +486,10 @@ start_time = datetime.now()
 output(start_time)
 
 tod = time.gmtime() 
-time_based_update()
+#time_based_update()
 #update_teams()
 #update_fantasy_teams()
-#update_players('%')
+update_players('%')
 #update_nba_results()
 		
 con.close()

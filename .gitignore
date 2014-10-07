@@ -2,12 +2,12 @@
 ## Me
 #################
 
-
-Libraries/
-data/images/icons/
+boss/
+lau/
 cgi/python/bs4
-js/libs
 tutorials
+Libraries
+demos
 config.py
 *blah*.*
 *test*.*

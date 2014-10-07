@@ -32,7 +32,7 @@ try:
 		print response_body	
 	elif task == 'fantasyTeams':
 		cur = con.cursor(mdb.cursors.DictCursor)
-		cur.execute("SELECT t1.id, t1.name, t1.moniker, sum(t2.score > t2.opponent_score) as wins, sum(t2.score < t2.opponent_score) as losses, sum(t2.score)/count(t2.game) as ave FROM fantasyTeams as t1 LEFT JOIN fantasyResults as t2 ON (t1.id = t2.team) GROUP BY t1.id ORDER BY wins desc, ave desc")
+		cur.execute("SELECT t1.id, t1.name, t1.moniker, sum(t2.score > t2.opponent_score) as wins, sum(t2.score < t2.opponent_score) as losses, sum(t2.score)/count(t2.game) as ave FROM fantasyTeams as t1 LEFT JOIN fantasyResults as t2 ON (t1.id = t2.team) WHERE t2.game < 70 GROUP BY t1.id ORDER BY wins desc, ave desc")
 
 		data = cur.fetchall()
 	
